@@ -1,59 +1,70 @@
-import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+ import { Authenticator } from '@aws-amplify/ui-react'
+ import '@aws-amplify/ui-react/styles.css'
+import { useState } from "react";
 
-import { Authenticator } from '@aws-amplify/ui-react'
-import '@aws-amplify/ui-react/styles.css'
-
-const client = generateClient<Schema>();
-
-function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
-
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
+function App(){
+  const [mail, setmail] = useState('');
+  const [subject, setsubject] = useState('');
+  const [body, setbody] = useState('');  
+  const handlemailChange = (event:any) => {
+    setmail(event.target.value)
   }
-    
-  function deleteTodo(id: string) {
-    client.models.Todo.delete({ id })
+  const handlesubjectChange = (event:any) =>{
+    setsubject(event.target.value)
   }
-
+  const handlebodyChange = (event:any) => {
+    setbody(event.target.value)
+  }
+    const handleSubmit = async (event:any) =>{
+      event.preventDefault();
+      const details ={
+        mail:mail,
+        subject: subject,
+        body:body
+      };
+      fetch("https://e2vp4vowjh.execute-api.us-east-1.amazonaws.com/test/", {
+        method : 'POST',
+        headers: {'Content-Type':'application/json',},
+        body: JSON.stringify(details),
+      })
+      if(details){
+        alert("Mail sent successfully");
+        App();
+      }
+      else{
+        alert("Error posting details")
+      }
+    } 
+  function clearform(){ 
+  }
   return (
-        
     <Authenticator>
       {({ signOut, user }) => (
     <main>
-      <h1>{user?.signInDetails?.loginId}'s todos</h1>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li 
-          onClick={() => deleteTodo(todo.id)}
-          key={todo.id}>{todo.content}</li>
-        ))}
-        
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-      <button onClick={signOut}>Sign out</button>
+      <h2>{user?.signInDetails?.loginId}'s form</h2>
+      <h1>Form to send mail using SES</h1>
+      <form>
+        <div className="email">
+          <label htmlFor="mail" className='email'>Email:</label><br/>
+          <input className="itsmail" id="mail" value={mail} onChange={handlemailChange} type="text"></input>
+        </div><br/>
+        <div className="Subject">
+          <label htmlFor="subject" className='subject'>Subject:</label><br/>
+          <input className ="itssubject" id="subject" value={subject} onChange={handlesubjectChange} type="text"></input>
+        </div><br/>
+        <div className="mailtext">
+          <label htmlFor="body">Text to be sent in mail:</label><br/>
+          <textarea className= "itsbody" id="body" value={body} onChange={handlebodyChange}></textarea>
+        </div><br/>
+        <div className="Buttons">
+          <button type="submit" onClick = {handleSubmit}>Submit</button>
+          <button type="submit" onClick={clearform}>Cancel</button>
+        </div>
+      </form><br/>
+      <button type="submit" className="signout" onClick={signOut}>Sign out</button>
     </main>
-        
-        )}
-        </Authenticator>
-
+    )}
+    </Authenticator>
   );
 }
-
 export default App;
