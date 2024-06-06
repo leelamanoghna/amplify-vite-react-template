@@ -22,20 +22,21 @@ function App(){
         subject: subject,
         body:body
       };
-      fetch("https://e2vp4vowjh.execute-api.us-east-1.amazonaws.com/test/", {
+      fetch("https://mug2oubgoh.execute-api.us-east-1.amazonaws.com/test/", {
         method : 'POST',
         headers: {'Content-Type':'application/json',},
         body: JSON.stringify(details),
       })
       if(details){
         alert("Mail sent successfully");
-        App();
+        window.location.reload();
       }
       else{
         alert("Error posting details")
       }
     } 
   function clearform(){ 
+    window.location.reload();
   }
   return (
     <Authenticator>
